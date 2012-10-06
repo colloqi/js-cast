@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+	<!-- swfobject is a commonly used library to embed Flash content -->
+	<script type="text/javascript"
+		src="swfobject.js"></script>
+
+	<!-- Setup the recorder interface -->
+	<script type="text/javascript" src="wami/recorder.js"></script>
+	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>	
+	<script type="text/javascript" src="jscast.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="container">
+		<div id="channels_container">
+			<div>
+				<button id="create_new_button" type="button">Start New Channel</button>	
+			</div>
+			<hr />
+			<div style="clear:both; float: right;padding-bottom: 5px;">
+				<button id="refresh_button" style="font-size:xx-small;">Refresh</button>
+			</div>
+			<hr style="clear: both;" />
+			<ul id="channel_list">
+				<li>
+					No Channels Available.
+				</li>
+			</ul>
+		</div>
+		<div id="content_container">
+			<div id="player_container">
+				<audio id="audio_player" src="" autoplay="autoplay" preload="auto" controls="controls"></audio>
+			</div>
+			<div id="dialog">
+				<form id="create_new_form" style="display: none;">
+					<div class="form_row">
+						<label for="name">Name:</label>
+						<input type="text" name="name" />
+					</div>
+					<div class="form_row">
+						<label for="desc">Description:</label>
+						<input type="text" name="desc" />	
+					</div>
+					<div class="form_row">
+						<input type="submit" value="create" />
+						<input id="cancel_button" type="reset" value="cancel" />
+					</div>					
+				</form>
+			</div>
+			<div id="wami_gui_container" style="display:none;">
+				flash permission thing appears here
+			</div>	
+		</div>
+	</div>
+	<!--div style="margin-left: 400px;">
+		<button onclick="setupRecorder();">setup Recorder</button>
+		<button onclick="startRecording();">start Recording</button>
+		<button onclick="stopRecording();">stop Recording</button>
+	</div-->
+</body>
+</html>
