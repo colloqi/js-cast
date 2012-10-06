@@ -1,0 +1,70 @@
+body {
+	margin: 2%;
+	border: 1px groove;
+	overflow: hidden;
+}
+
+#container {
+	height: 500px;
+	width: 100%;
+	padding: 2%;
+}
+
+#channels_container {
+	float:left;
+	width: auto;
+	border-left: 1px dotted;
+	border-right: 1px dotted
+}
+
+#channels_container ul {
+	list-style: none;
+	margin: 5px;
+	padding: 0px;
+}
+
+#channels_container ul li {
+	margin: 2px;
+	padding: 0px;
+}
+
+#content_container {
+	float: left;
+	margin-left: 50px;
+}
+
+#wami_gui_container {
+	margin: 10px;
+}
+
+.form_row {
+	width: 200px;
+	margin: 2px;
+	padding: 2px;
+	clear: both;
+}
+
+.form_row input {
+	float: right;
+}
+
+#dialog {
+	float: right;
+	width: 300px;
+	height: 200px;
+	border: 1px dotted;
+	margin-left: 20px;
+}
+
+#player_container {
+	float: right;
+	width: 400px;
+	height: 200px;
+	margin-left: 20px;
+}
+
+#audio_player {
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 90px;
+}
