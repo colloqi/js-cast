@@ -24,12 +24,8 @@
                 console: false,
 				onReady : function(){
 					wami_initialized= true;
-					setTimeout(function(){
-						document.getElementById(wami_div_id).style.visibility= "hidden";
-					}, 1000);
 					var ws= Wami.getSettings();
 					ws.container= "au";
-                    ws.console= undefined;
 					try{
 						Wami.setSettings(ws);	
 					}catch(e){
@@ -37,12 +33,14 @@
 						console.log(e);
 					}
 					self.requestChannel(name, description);
+                    Wami.hide();
 				},
                 onLoaded: function(){
                     
                 },
                 onError: function(){
-                    
+                    console.log("Wami error");
+                    console.log(arguments);
                 }
 			});
 		}
@@ -66,7 +64,15 @@
 	SClass.prototype.start= function(url){
 		var recording_url= window.location.href.toString().replace(window.location.pathname.toString(), "")+url;
 		console.log("Recording url=>"+recording_url);
-		Wami.startRecording(recording_url);
+        try {
+            Wami.startRecording(recording_url);
+        }
+        catch(e){
+            //IF the recording stops automatically, this is executed.
+            console.log("Retry recording...");
+            Wami.startRecording(recording_url);
+        }
+		
         this._send("STARTED");
 	};
 	

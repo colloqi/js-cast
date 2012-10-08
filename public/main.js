@@ -25,6 +25,8 @@ $(document).ready(function(){
 	}
 	
 	var broadcasting= false;
+	var elapsed= 0, last_ts= 0;;
+	var timer= null;
 
 	JSCast.configure({
 		wami_container: "wami_gui_container"
@@ -33,11 +35,23 @@ $(document).ready(function(){
 		switch(evt){
 		case "STARTED":
 			broadcasting= true;
+			last_ts= new Date().getTime();
 			$("#dialog").hide();
 			$("#create_new_button").text("Stop Your Channel");
+			timer= setInterval(function(){
+				var prev_ts= last_ts;
+				last_ts= new Date().getTime();
+				elapsed += (last_ts-prev_ts);
+				var s= Math.round(elapsed/1000);
+				$("#elapsed").text(Math.floor(s/60)+":"+Math.round(s%60));
+			}, 1000);
 			break;
 		case "ENDED":
 			broadcasting= false;
+			if (timer){
+				clearInterval(timer);
+				timer= null;
+			}
 			$("#create_new_button").text("Start Channel");
 			break;
 		}
