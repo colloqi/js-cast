@@ -3,6 +3,7 @@
 	var wami_initialized= false, recording= false;
 	var evt_handler;
 	var wami_div_id;
+    var stop_url= "";
 	
 	var SClass= function(){
 		//load additional js required for wami
@@ -20,14 +21,15 @@
 			Wami.setup({
 				id : wami_div_id,
 				swfUrl: "/wami/Wami.swf",
+                console: false,
 				onReady : function(){
 					wami_initialized= true;
-					/*
 					setTimeout(function(){
 						document.getElementById(wami_div_id).style.visibility= "hidden";
-					}, 1000);*/
+					}, 1000);
 					var ws= Wami.getSettings();
 					ws.container= "au";
+                    ws.console= undefined;
 					try{
 						Wami.setSettings(ws);	
 					}catch(e){
@@ -35,7 +37,13 @@
 						console.log(e);
 					}
 					self.requestChannel(name, description);
-				}
+				},
+                onLoaded: function(){
+                    
+                },
+                onError: function(){
+                    
+                }
 			});
 		}
 		else {
@@ -46,8 +54,10 @@
 	SClass.prototype.requestChannel= function(name, description){
 		var self= this;
 		$.ajax({
+            data: {name: name, description: description},
 			url: '/jscast/start',
 			success: function(data) {
+                stop_url= data.stop_url;
 				self.start(data.post_url);
 			}
 		});
@@ -61,7 +71,12 @@
 	};
 	
 	SClass.prototype.stop= function(){
-		Wami.stopRecording();	
+		Wami.stopRecording();
+        $.ajax({
+			url: stop_url,
+			success: function(data) {
+			}
+		});
 		this._send("ENDED");
 	};
 	

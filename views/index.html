@@ -16,27 +16,29 @@
 
 <body>
 	<div id="container">
-		<div id="channels_container">
+		<div id="left_section"><!-- contains list of channels and a player -->
+			<div id="channels_container">
+				<div style="text-align: right;">
+					<button id="refresh_button" style="font-size:xx-small;">Refresh</button>
+				</div>
+				<ul id="channel_list">
+					<li>
+						No Channels Available.
+					</li>
+				</ul>
+			</div>
+			<div id="player_container">
+				<audio id="audio_player" src="" autoplay="autoplay" preload="auto" controls="controls"></audio>
+			</div>
+		</div>
+		
+		<div id="right_section">
 			<div>
 				<button id="create_new_button" type="button">Start New Channel</button>	
 			</div>
 			<hr />
-			<div style="clear:both; float: right;padding-bottom: 5px;">
-				<button id="refresh_button" style="font-size:xx-small;">Refresh</button>
-			</div>
-			<hr style="clear: both;" />
-			<ul id="channel_list">
-				<li>
-					No Channels Available.
-				</li>
-			</ul>
-		</div>
-		<div id="content_container">
-			<div id="player_container">
-				<audio id="audio_player" src="" autoplay="autoplay" preload="auto" controls="controls"></audio>
-			</div>
-			<div id="dialog">
-				<form id="create_new_form" style="display: none;">
+			<div id="dialog" style="display: none;">
+				<form id="create_new_form">
 					<div class="form_row">
 						<label for="name">Name:</label>
 						<input type="text" name="name" />
@@ -52,14 +54,8 @@
 				</form>
 			</div>
 			<div id="wami_gui_container" style="display:none;">
-				flash permission thing appears here
 			</div>	
 		</div>
 	</div>
-	<!--div style="margin-left: 400px;">
-		<button onclick="setupRecorder();">setup Recorder</button>
-		<button onclick="startRecording();">start Recording</button>
-		<button onclick="stopRecording();">stop Recording</button>
-	</div-->
 </body>
 </html>

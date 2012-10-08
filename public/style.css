@@ -12,7 +12,9 @@ body {
 
 #channels_container {
 	float:left;
-	width: auto;
+	width: 200px;
+	height: 500px;
+	padding: 5px;
 	border-left: 1px dotted;
 	border-right: 1px dotted
 }
@@ -26,11 +28,6 @@ body {
 #channels_container ul li {
 	margin: 2px;
 	padding: 0px;
-}
-
-#content_container {
-	float: left;
-	margin-left: 50px;
 }
 
 #wami_gui_container {
@@ -48,16 +45,26 @@ body {
 	float: right;
 }
 
+#left_section {
+	width: 55%;
+	float:left;
+	border-right:2px double;
+}
+
+#right_section {
+	width: 35%;
+	margin-left: 20px;
+	float: left;
+}
+
 #dialog {
-	float: right;
 	width: 300px;
 	height: 200px;
-	border: 1px dotted;
 	margin-left: 20px;
 }
 
 #player_container {
-	float: right;
+	float: left;
 	width: 400px;
 	height: 200px;
 	margin-left: 20px;

@@ -39,15 +39,12 @@ app.get('/index.html', function(req, res){
 app.get("/channels", function(req, res){
 	//This is not made part of /jscast/channels as there may be a need to hide active channels from client.
 	//send json response containing all the urls and names the active clients
-	console.log("Request for channels received:");
 	var channels= jscast.getActiveClients();
 	res.contentType('json');
 	res.send(channels);
-	console.log("sent channels");
-	console.log(channels);
 });
 
 jscast.configure(app, {max_clients: 3});
 
 app.listen(3000);
-console.log("App listening on port 3000");
+console.log("Server listening on port 3000");
