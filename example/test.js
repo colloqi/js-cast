@@ -1,5 +1,5 @@
 
-var jscast= require("./");
+var jscast= require("js-cast");
 
 var express = require('express');
 var app = express();
@@ -44,7 +44,14 @@ app.get("/channels", function(req, res){
 	res.send(channels);
 });
 
-jscast.configure(app, {max_clients: 3});
+var options= {
+icecast: {
+                server: "http://localhost:8000/",
+                sourcepassword: "hackme"
+        }
+};
+
+jscast.configure(app, options);
 
 app.listen(3000);
 console.log("Server listening on port 3000");
