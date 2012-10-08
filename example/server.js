@@ -2,8 +2,16 @@
 var jscast= require("js-cast");
 
 var express = require('express');
-var app = express();
 
+//NOTE: update below icecast details to suit ur server configuration.
+var options= {
+icecast: {
+                server: "http://localhost:8000/",
+                sourcepassword: "hackme"
+        }
+};
+
+var app = express();
 
 // Configuration
 app.configure(function(){
@@ -43,13 +51,6 @@ app.get("/channels", function(req, res){
 	res.contentType('json');
 	res.send(channels);
 });
-
-var options= {
-icecast: {
-                server: "http://localhost:8000/",
-                sourcepassword: "hackme"
-        }
-};
 
 jscast.configure(app, options);
 
