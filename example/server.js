@@ -1,14 +1,13 @@
 
-var jscast= require("js-cast");
-
+var jscast = require("js-cast");
 var express = require('express');
 
 //NOTE: update below icecast details to suit ur server configuration.
-var options= {
-icecast: {
-                server: "http://localhost:8000/",
-                sourcepassword: "hackme"
-        }
+var options = {
+    icecast: {
+        server: "http://localhost:8000/",
+        sourcepassword: "hackme"
+    }
 };
 
 var app = express();
@@ -32,7 +31,7 @@ app.configure('development', function(){
 });
 
 app.configure('production', function(){
-  app.use(express.errorHandler()); 
+    app.use(express.errorHandler()); 
 });
 
 // Routes
@@ -47,7 +46,7 @@ app.get('/index.html', function(req, res){
 app.get("/channels", function(req, res){
 	//This is not made part of /jscast/channels as there may be a need to hide active channels from client.
 	//send json response containing all the urls and names the active clients
-	var channels= jscast.getActiveClients();
+	var channels = jscast.getActiveClients();
 	res.contentType('json');
 	res.send(channels);
 });

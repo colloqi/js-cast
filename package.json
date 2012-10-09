@@ -9,8 +9,7 @@
   "dependencies": {
     "fs.extra": "1.2.0",
     "clone": "0.1.1",
-    "ejs":"0.8.3",
-    "express":"3.0.0rc4"
+    "node-static": "0.6.2"
   },
   "keywords": [
     "icecast",

@@ -7,7 +7,7 @@
     "email": "balaji@ariemtech.com"
   },
   "dependencies": {
-    "js-cast": "0.0.3",
+    "js-cast": "0.0.4",
     "ejs":"0.8.3",
     "express":"3.0.0rc4"
   },
