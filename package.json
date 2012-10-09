@@ -24,7 +24,7 @@
     "type": "git",
     "url": "git://github.com/ariemtech/js-cast.git"
   },
-  "main": "./lib/JSCast.js",
+  "main": "./index.js",
   "engines": {
     "node": "*"
   },
