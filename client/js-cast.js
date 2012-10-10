@@ -157,6 +157,7 @@
 	
 	RecorderClass.prototype.stop= function(){
 		Wami.stopRecording();
+		this.endStopWatch();
 		this.emit("end");
 	};
 	

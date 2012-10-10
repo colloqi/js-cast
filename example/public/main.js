@@ -40,7 +40,7 @@ $(document).ready(function(){
 	JSCast.on("progress", function(elapsed){
 		var s= Math.round(elapsed%60),
 			m= Math.floor(elapsed/60);
-		$("#elapsed").text((m>10?m:"0"+m)+":"+(s>10? s : "0"+s));
+		$("#elapsed").text((m>9?m:"0"+m)+":"+(s>9? s : "0"+s));
 	});
 	
 	loadChannelList();
