@@ -25,36 +25,22 @@ $(document).ready(function(){
 	}
 	
 	var broadcasting= false;
-	var elapsed= 0, last_ts= 0;;
-	var timer= null;
-
-	JSCast.configure({
-		wami_container: "wami_gui_container"
-	},
-	function(evt){
-		switch(evt){
-		case "STARTED":
-			broadcasting= true;
-			last_ts= new Date().getTime();
-			$("#dialog").hide();
-			$("#create_new_button").text("Stop Your Channel");
-			timer= setInterval(function(){
-				var prev_ts= last_ts;
-				last_ts= new Date().getTime();
-				elapsed += (last_ts-prev_ts);
-				var s= Math.round(elapsed/1000);
-				$("#elapsed").text(Math.floor(s/60)+":"+Math.round(s%60));
-			}, 1000);
-			break;
-		case "ENDED":
-			broadcasting= false;
-			if (timer){
-				clearInterval(timer);
-				timer= null;
-			}
-			$("#create_new_button").text("Start Channel");
-			break;
-		}
+	
+	JSCast.configure("security_settings_container");
+	JSCast.on("start", function(){
+		broadcasting= true;
+		$("#dialog").hide();
+		$("#create_new_button").text("Stop Your Channel");
+	});
+	JSCast.on("end", function(){
+		broadcasting= false;
+		$("#create_new_button").text("Start Channel");
+	});
+	
+	JSCast.on("progress", function(elapsed){
+		var s= Math.round(elapsed%60),
+			m= Math.floor(elapsed/60);
+		$("#elapsed").text((m>10?m:"0"+m)+":"+(s>10? s : "0"+s));
 	});
 	
 	loadChannelList();
@@ -81,6 +67,6 @@ $(document).ready(function(){
 		$("#dialog").hide();
 		var name= $(this).find(":input[name=name]").val();
 		var description= $(this).find(":input[name=description]").val();
-		JSCast.create(name, description);
+		JSCast.start(name, description);
 	});
 });

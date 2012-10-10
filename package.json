@@ -1,7 +1,7 @@
 {
   "name": "js-cast",
   "description": "Voice Streaming from client Browser using icecast server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "D Balaji",
     "email": "balaji@ariemtech.com"
@@ -9,7 +9,8 @@
   "dependencies": {
     "fs.extra": "1.2.0",
     "clone": "0.1.1",
-    "node-static": "0.6.2"
+    "node-static": "0.6.2",
+    "util": "0.4.9"
   },
   "keywords": [
     "icecast",
