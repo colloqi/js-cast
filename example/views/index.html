@@ -23,14 +23,17 @@
 				</ul>
 			</div>
 			<div id="player_container">
-				<audio id="audio_player" src="" autoplay="autoplay" preload="auto" controls="controls"></audio>
+				<p id="play_start_time"></p>
+				<p id="play_elapsed">00:00</p>
+				<audio id="audio_player" src="" autoplay="autoplay" preload="none" controls="controls"></audio>
 			</div>
 		</div>
 		
 		<div id="right_section">
 			<div>
 				<button id="create_new_button" type="button" style="text-align:left;">Start New Channel</button>
-				<div style="text-align: right;margin: 20px;"><p id="elapsed">00:00</p></div>
+				<p id="start_time"></p>
+				<p id="elapsed">00:00</p>
 			</div>
 			<hr />
 			<div id="dialog" style="display: none;">
