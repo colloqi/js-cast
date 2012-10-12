@@ -55,9 +55,8 @@
 	};
 	RecorderClass.prototype= new EventEmitter();//inherit from EventEmitter
 	
-	RecorderClass.prototype.load= function(ss_container){
+	RecorderClass.prototype.load= function(){
 		var self= this;
-		this._ss_container= ss_container;
 		//load additional js required for wami
 		//swfobject is a commonly used library to embed Flash content
 		loadScript(server_config.swfobject_url, function(){
@@ -68,8 +67,9 @@
 		});
 	};
 	
-	RecorderClass.prototype.init= function(){
+	RecorderClass.prototype.init= function(ss_container){
 		var self= this;
+		this._ss_container= ss_container;
 		if (!self._initialized){
 			document.getElementById(self._ss_container).style.display="";
 			Wami.setup({
@@ -100,6 +100,38 @@
 		}
 	};
 	
+	RecorderClass.prototype.start= function(){
+        try {
+            Wami.startRecording(this._recording_url);
+        }
+        catch(e){
+			//FIXME: need to remove this once automatic stopping is recognized
+            //IF the recording stops automatically, this is executed.
+            console.log("Retry recording...");
+            Wami.startRecording(this._recording_url);
+        }
+		this._elapsed= 0;
+		this.initStopWatch();
+		this.emit("start");
+		return true;
+	};
+	
+	RecorderClass.prototype.stop= function(){
+		Wami.stopRecording();
+		this.endStopWatch();
+		this.emit("end");
+	};
+	
+	//TODO: need to implement this
+	RecorderClass.prototype.pause= function(){
+		this.emit("paused");
+	};
+	
+	//TODO: need to implement this
+	RecorderClass.prototype.resume= function(){
+		this.emit("resumed");
+	};
+	
 	RecorderClass.prototype.initStopWatch= function(){
 		var self= this;
 		self._last_ts= new Date().getTime();
@@ -127,48 +159,9 @@
 		return this._initialized;
 	};
 	
-	RecorderClass.prototype.pause= function(){
-		
+	RecorderClass.prototype.setRecordingUrl= function(url){
+		this._recording_url= url;	
 	};
-	
-	RecorderClass.prototype.resume= function(){
-		
-	};
-	
-	RecorderClass.prototype.stop= function(){
-		
-	};
-	
-	RecorderClass.prototype.start= function(url){
-		console.log("Recording url=>"+url);
-        try {
-            Wami.startRecording(url);
-        }
-        catch(e){
-			//FIXME: need to remove this once automatic stopping is recognized
-            //IF the recording stops automatically, this is executed.
-            console.log("Retry recording...");
-            Wami.startRecording(url);
-        }
-		this._elapsed= 0;
-		this.initStopWatch();
-		this.emit("start");
-	};
-	
-	RecorderClass.prototype.stop= function(){
-		Wami.stopRecording();
-		this.endStopWatch();
-		this.emit("end");
-	};
-	
-	RecorderClass.prototype.pause= function(){
-		this.emit("paused");
-	};
-	
-	RecorderClass.prototype.resume= function(){
-		this.emit("resumed");
-	};
-	
 	
 	/**
 	 *	Following is the API impl exposed to the client browser.
@@ -176,7 +169,7 @@
 	
     /** private */
 	var BASE_URL;
-	var _stop_url = "", _recorder= null;
+	var _stop_url = "", _recording_url="", _recorder= null;
 	
 	var JSCastClass= function(){
 		var href= window.location.href.toString(),
@@ -187,12 +180,18 @@
 	JSCastClass.prototype= new EventEmitter();	//inherit from EventEmitter
 	
 	/**
-	 * @description: This is the first function to be invoked.
-	 * @argument ss_container - security settings container, where permissions dialog shall be shown.
+	 *@description: Loads necessary javascripts required (for recorder)
+	 *@event: "load" on success, "error" on failure
 	 */
-	JSCastClass.prototype.configure= function(ss_container){
-		_recorder.load(ss_container);
+	JSCastClass.prototype.load= function(){
+		_recorder.load();
 		var self= this;
+		_recorder.on("load", function(){
+			self.emit("load");
+		});
+		_recorder.on("init", function(){
+			self.emit("ready");
+		});
 		_recorder.on("paused", function(){
 			self.emit("paused");
 		});
@@ -212,20 +211,21 @@
 		});
 	};
 	
-	JSCastClass.prototype.start= function(name, description){
-		var self= this;
-		if (!_recorder.isInitialized()){
-			_recorder.init();
-			_recorder.on("init", function(){
-				self.requestChannel(name, description);
-			});
-		}
-		else {
-			self.requestChannel(name, description);
-		}
+	/**
+	 *@description: This function must be called before invoking `start`
+	 *@argument: ss_container - security settings container, where permissions dialog shall be shown.
+	 *@event: "ready" on success, "error" on failure
+	 */
+	JSCastClass.prototype.prepare= function(ss_container){
+		_recorder.init(ss_container);
 	};
 	
-	JSCastClass.prototype.requestChannel= function(name, description){
+	/**
+	 *@description: Gets recording url from server.
+	 *@event: "opened" on success, stream url is sent as event data.
+	 *@event: "error" on failure.
+	 */
+	JSCastClass.prototype.open= function(name, description){
 		var self= this;
 		$.ajax({
             data: {name: name, description: description},
@@ -233,11 +233,24 @@
 			success: function(data) {
                 _stop_url= data.stop_url;
 				var recording_url= BASE_URL + data.post_url;
-				_recorder.start(recording_url);
+				_recorder.setRecordingUrl(recording_url);
+				self.emit("opened", data.url);
 			}
 		});
 	};
 	
+	/**
+	 *@description: To be invoked when recording has to be started.
+	 *@event: "start" on success, "error" on failure.
+	 */
+	JSCastClass.prototype.start= function(){
+		return _recorder.start();
+	};
+	
+	/**
+	 *@description: To stop recording.
+	 *@event: none
+	 */
 	JSCastClass.prototype.stop= function(){
 		return _recorder.stop();
 	};

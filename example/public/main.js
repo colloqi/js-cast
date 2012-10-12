@@ -1,6 +1,8 @@
 
 $(document).ready(function(){
 	
+	var using_node_icecast= false;
+	
 	function loadChannelList(){
 		$.ajax({
 			url: '/channels',
@@ -20,9 +22,11 @@ $(document).ready(function(){
 					var url= $(this).attr("href");
 					$("#audio_player").attr("src", url);
 				});
-				if (data.length >0){
-					console.warn("About to play");
-					$("#audio_player").attr("src", data[0].url);
+				if (!using_node_icecast){
+					if (data.length >0){	//play the first channel available
+						console.warn("About to play");
+						$("#audio_player").attr("src", data[0].url);
+					}
 				}
 			}
 		});
@@ -80,24 +84,7 @@ $(document).ready(function(){
 		}.bind(this, evtname));
 	}
 	
-	JSCast.configure("security_settings_container");
-	JSCast.on("start", function(){
-		broadcasting= true;
-		$("#start_time").text("Started at "+new Date().toString());
-		$("#dialog").hide();
-		$("#create_new_button").text("Stop Your Channel");
-		loadChannelList();
-		//setTimeout(loadChannelList, 14000); (this is needed for icecast)
-	});
-	JSCast.on("end", function(){
-		broadcasting= false;
-		$("#start_time").text("");
-		$("#create_new_button").text("Start Channel");
-	});
-	
-	JSCast.on("progress", function(elapsed){
-		$("#elapsed").text(formatTime(elapsed));
-	});
+	JSCast.load();
 	
 	loadChannelList();
 	
@@ -123,6 +110,32 @@ $(document).ready(function(){
 		$("#dialog").hide();
 		var name= $(this).find(":input[name=name]").val();
 		var description= $(this).find(":input[name=description]").val();
-		JSCast.start(name, description);
+		
+		JSCast.on("ready", function(){
+			JSCast.open(name, description);	
+		});
+		JSCast.on("opened", function(stream_url){
+			//do any initialization required such as sending url to the listeners.
+			JSCast.start();
+		});
+		JSCast.on("start", function(){
+			broadcasting= true;
+			$("#start_time").text("Started at "+new Date().toString());
+			$("#dialog").hide();
+			$("#create_new_button").text("Stop Your Channel");
+			if (!using_node_icecast){
+				setTimeout(loadChannelList, 14000);
+			}
+		});
+		JSCast.on("end", function(){
+			broadcasting= false;
+			$("#start_time").text("");
+			$("#create_new_button").text("Start Channel");
+		});
+		JSCast.on("progress", function(elapsed){
+			$("#elapsed").text(formatTime(elapsed));
+		});
+		
+		JSCast.prepare("security_settings_container");
 	});
 });
