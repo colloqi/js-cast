@@ -80,6 +80,7 @@
 	
 	var RecorderClass= function(){
 		this._initialized= false;
+		this._loaded= false;
 		this._recording= false;
 		this._ss_container= "";
 		this._elapsed= 0, this._last_ts= 0;
@@ -89,14 +90,20 @@
 	
 	RecorderClass.prototype.load= function(){
 		var self= this;
-		//load additional js required for wami
-		//swfobject is a commonly used library to embed Flash content
-		loadScript(server_config.swfobject_url, function(){
-			// Setup the recorder interface
-			loadScript(server_config.recorder_url, function(){
-				self.emit("load");
+		if (this._loaded){
+			self.emit("load");
+		}
+		else {
+			//load additional js required for wami
+			//swfobject is a commonly used library to embed Flash content
+			loadScript(server_config.swfobject_url, function(){
+				// Setup the recorder interface
+				loadScript(server_config.recorder_url, function(){
+					self._loaded= true;
+					self.emit("load");
+				});
 			});
-		});
+		}
 	};
 	
 	RecorderClass.prototype.init= function(ss_container){
@@ -164,6 +171,7 @@
 		this.emit("resumed");
 	};
 	
+	//TODO: need to get the progress events from flah, as it would be accurate.
 	RecorderClass.prototype.initStopWatch= function(){
 		var self= this;
 		self._last_ts= new Date().getTime();
