@@ -40,8 +40,9 @@
 		}
 		xmlhttp.onreadystatechange= function(progress_evt) {
 			if (xmlhttp.readyState==4 && xmlhttp.status==200){
-				console.log(xmlhttp.responseText);
-				args.success && args.success(JSON.parse(xmlhttp.responseText));
+				var content_type= xmlhttp.getResponseHeader("Content-Type");
+				var out= content_type.indexOf("application/json") != -1 ? JSON.parse(xmlhttp.responseText) : xmlhttp.responseText;
+				args.success && args.success(out);
 			}
 		}
 		var qs="";
