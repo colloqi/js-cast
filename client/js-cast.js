@@ -29,6 +29,37 @@
         document.getElementsByTagName("head")[0].appendChild(script);
     }
 	
+	function sendAjaxReq(args){
+		var url= args.url;
+		var xmlhttp;
+		if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp=new XMLHttpRequest();
+		}
+		else {// code for IE6, IE5
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange= function(progress_evt) {
+			if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				console.log(xmlhttp.responseText);
+				args.success && args.success(JSON.parse(xmlhttp.responseText));
+			}
+		}
+		var qs="";
+		for(var key in args.data) {
+			var value = args.data[key];
+			if (value){
+				qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";	
+			}
+		}
+		if (qs.length > 0){
+			qs = qs.substring(0, qs.length-1); //chop off last "&"
+			url = url + "?" + qs;
+		}
+
+		xmlhttp.open("GET", url,true);
+		xmlhttp.send();
+	}
+	
 	/**
 	 *	Simple EventEmitter similar to nodejs.
 	 */
@@ -202,7 +233,7 @@
 			self.emit("start");
 		});
 		_recorder.on("end", function(){
-			$.ajax({
+			sendAjaxReq({
 				url: _stop_url,
 				success: function(data) {
 				}
@@ -227,7 +258,7 @@
 	 */
 	JSCastClass.prototype.open= function(name, description){
 		var self= this;
-		$.ajax({
+		sendAjaxReq({
             data: {name: name, description: description},
 			url: server_config.start_url,
 			success: function(data) {
