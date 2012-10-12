@@ -208,13 +208,10 @@
 	 */
 	
     /** private */
-	var BASE_URL;
+	var BASE_URL= location.protocol + '//' + location.host;
 	var _stop_url = "", _recording_url="", _recorder= null;
 	
 	var JSCastClass= function(){
-		var href= window.location.href.toString(),
-			pathname= window.location.pathname.toString();
-		BASE_URL= href.substr(0, href.length-pathname.length);
 		_recorder= new RecorderClass();
 	};
 	JSCastClass.prototype= new EventEmitter();	//inherit from EventEmitter
