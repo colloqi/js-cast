@@ -1,7 +1,7 @@
 {
   "name": "js-cast",
   "description": "Voice Streaming from client Browser using icecast server",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": {
     "name": "D Balaji",
     "email": "balaji@ariemtech.com"
