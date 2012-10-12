@@ -7,7 +7,8 @@ var options = {
     icecast: {
         server: "http://localhost:8000/",
         sourcepassword: "hackme"
-    }
+    },
+    use_node_icecast: true
 };
 
 var app = express();

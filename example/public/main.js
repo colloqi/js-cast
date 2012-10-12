@@ -1,7 +1,7 @@
 
 $(document).ready(function(){
 	
-	var using_node_icecast= false;
+	var using_node_icecast= true;
 	
 	function loadChannelList(){
 		$.ajax({
@@ -116,6 +116,9 @@ $(document).ready(function(){
 		});
 		JSCast.on("opened", function(stream_url){
 			//do any initialization required such as sending url to the listeners.
+			if (using_node_icecast){
+				$("#audio_player").attr("src", stream_url);
+			}
 			JSCast.start();
 		});
 		JSCast.on("start", function(){
