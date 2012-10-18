@@ -1,8 +1,6 @@
 
 $(document).ready(function(){
 	
-	var using_node_icecast= true;
-	
 	function loadChannelList(){
 		$.ajax({
 			url: '/channels',
@@ -22,12 +20,6 @@ $(document).ready(function(){
 					var url= $(this).attr("href");
 					$("#audio_player").attr("src", url);
 				});
-				if (!using_node_icecast){
-					if (data.length >0){	//play the first channel available
-						console.warn("About to play");
-						$("#audio_player").attr("src", data[0].url);
-					}
-				}
 			}
 		});
 	}
@@ -116,9 +108,7 @@ $(document).ready(function(){
 		});
 		JSCast.on("opened", function(stream_url){
 			//do any initialization required such as sending url to the listeners.
-			if (using_node_icecast){
-				$("#audio_player").attr("src", stream_url);
-			}
+			$("#audio_player").attr("src", stream_url);
 			JSCast.start();
 		});
 		JSCast.on("start", function(){
@@ -126,9 +116,6 @@ $(document).ready(function(){
 			$("#start_time").text("Started at "+new Date().toString());
 			$("#dialog").hide();
 			$("#create_new_button").text("Stop Your Channel");
-			if (!using_node_icecast){
-				setTimeout(loadChannelList, 14000);
-			}
 		});
 		JSCast.on("end", function(){
 			broadcasting= false;

@@ -1,24 +1,23 @@
 {
   "name": "js-cast-example",
-  "description": "Voice Streaming from client Browser using icecast server",
-  "version": "0.0.4",
+  "description": "js-cast simple example",
+  "private": true,
+  "version": "0.0.5",
   "author": {
     "name": "D Balaji",
     "email": "balaji@ariemtech.com"
   },
   "dependencies": {
-    "js-cast": "0.0.5",
+    "js-cast": "0.0.x",
     "ejs":"0.8.3",
     "express":"3.0.0rc4"
   },
   "keywords": [
-    "icecast",
     "voice",
-    "broadcast",
+    "record",
     "stream",
     "wami",
-    "html5",
-    "ezstream"
+    "html5"
   ],
   "repository": {
     "type": "git",
