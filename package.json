@@ -1,7 +1,7 @@
 {
   "name": "js-cast",
   "description": "Voice Streaming from client Browser using nodejs",
-  "version": "0.0.14",
+  "version": "0.1.0",
   "author": {
     "name": "D Balaji",
     "email": "balaji@ariemtech.com"
