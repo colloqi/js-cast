@@ -2,9 +2,14 @@
 (function(){
 	var server_config= {
 		start_url: "/js-cast/start",
-		swfobject_url: "/js-cast/external/swfobject.js",
-		wami_swfurl: "/js-cast/external/wami/Wami.swf",
-		recorder_url: "/js-cast/external/wami/recorder.js"
+		wami: {
+			swfobject_url: "/js-cast/external/swfobject.js",
+			swfurl: "/js-cast/external/wami/Wami.swf",
+			recorderjs_url: "/js-cast/external/wami/recorder.js"
+		},
+		webaudio: {
+			workerjs_url: "/js-cast/client/WebAudioWorker.js"
+		}
 	};
 	
 	function loadScript(url, callback){
@@ -78,6 +83,186 @@
 		}
 	};
 	
+	//web Audio based Audio-conf
+	var WebAudioClass = function() {
+		this.audioSessionInProgress = false;
+		
+		this.numChannels = 2;		//hardcoded to 2
+		this.Float32ArrayBuffer = [];
+		
+		this.context = null;
+		this.node = null;
+		this.mediaStreamSource = null;
+		this.worker = null;
+	};
+	
+	WebAudioClass.prototype= new EventEmitter();//inherit from EventEmitter
+	
+	WebAudioClass.prototype.load= function(callback){
+		callback();//nothing to load
+	};
+	
+	WebAudioClass.prototype.init = function(a_config) {
+		var self = this;
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+									navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		
+		var default_config= {bufferLen: 4096}
+		var config = a_config || {};
+		for (var key in default_config){
+			this[key] = typeof (config[key]) !== "undefined"? config[key] : default_config[key];
+		}
+						
+		this.Float32ArrayBuffer[0] = new Float32Array(this.bufferLen);	
+		this.Float32ArrayBuffer[1] = new Float32Array(this.bufferLen);
+										   
+		var createAudioContext = function(localMediaStream) {
+			
+			var playBuffer = [];
+						
+		    if (!self.context) { 						//already done
+				try {
+					self.context = new webkitAudioContext();
+				}
+				catch(e) {
+					alert("Web API is not supported in your browser"+
+												"Try enabling Web Audio flags in Chrome");
+					return;
+				}
+						
+				self.node = self.context.createJavaScriptNode(self.bufferLen, self.numChannels, self.numChannels);
+				
+				self.worker = new Worker(server_config.webaudio.workerjs_url);
+				
+				self.worker.onmessage = function(e){
+					var ab = e.data;
+					//self.emit('data',ab);
+					sendPCMData(self._recording_url, ab);
+				}
+				
+				self.worker.postMessage({
+					command: 'init',
+					config: {
+						sampleRate: self.context.sampleRate
+					}
+				});
+			}
+			
+			self.node.onaudioprocess = function(e){
+			
+				//playBuffer[0] = e.outputBuffer.getChannelData(0);
+				//playBuffer[1] = e.outputBuffer.getChannelData(1);
+			
+				if (!self.audioSessionInProgress) return;
+				self.worker.postMessage({
+					command: 'record',
+					buffer: [
+						e.inputBuffer.getChannelData(0),
+						e.inputBuffer.getChannelData(1)
+					]
+				});
+			}
+			
+			self.mediaStreamSource = self.context.createMediaStreamSource(localMediaStream);
+			self.mediaStreamSource.connect(self.node);
+			self.node.connect(self.context.destination);
+			self.emit("init");
+		};
+		navigator.getUserMedia({audio: true}, createAudioContext);
+	};
+	
+	WebAudioClass.prototype.record = function(recording_url) {
+		this._recording_url = recording_url;
+		this.mediaStreamSource.connect(this.node);
+		this.audioSessionInProgress = true;
+		this.worker.postMessage({
+			command: 'config',
+			config: {
+				url: recording_url
+			}
+		});
+	};
+	
+	WebAudioClass.prototype.pause = function() {
+		this.mediaStreamSource.disconnect();
+		this.audioSessionInProgress = true;
+	};
+
+	WebAudioClass.prototype.stop = function() {
+		if (this.mediaStreamSource) {
+			this.mediaStreamSource.disconnect();
+		}
+		this.node.disconnect();
+		this.audioSessionInProgress = false;
+	};
+	//end web Audio based Audio-conf
+	
+	//start Wami based Audio Recorder
+	var WamiRecorderClass= function(){
+		
+	};
+	WamiRecorderClass.prototype= new EventEmitter();//inherit from EventEmitter
+	
+	WamiRecorderClass.prototype.load= function(callback){
+		//load additional js required for wami
+		//swfobject is a commonly used library to embed Flash content
+		loadScript(server_config.wami.swfobject_url, function(){
+			// Setup the recorder interface
+			loadScript(server_config.wami.recorderjs_url, function(){
+				callback();
+			});
+		});
+	};
+	
+	WamiRecorderClass.prototype.init= function(config){
+		var self= this;
+		document.getElementById(config.ss_container).style.display="";
+		Wami.setup({
+			id : config.ss_container,
+			swfUrl: server_config.wami.swfurl,
+			onReady : function(){
+				self._initialized= true;
+				var ws= Wami.getSettings();
+				ws.container= "au";     //options for streaming (POST)
+				try{
+					Wami.setSettings(ws);
+				}
+				catch(e){
+				}
+				Wami.hide();
+				self.emit("init");
+			},
+			onLoaded: function(){	
+			},
+			onError: function(){
+				self.emit("error", arguments);
+			}
+		});
+	};
+	
+	WamiRecorderClass.prototype.record= function(recording_url){
+		console.log("record function called:"+recording_url);
+		try {
+           Wami.startRecording(recording_url);
+        }
+        catch(e){
+                       //FIXME: need to remove this once automatic stopping is recognized
+            //IF the recording stops automatically, this is executed.
+            console.log("Retry recording...");
+            Wami.startRecording(recording_url);
+        }
+	};
+	
+	WamiRecorderClass.prototype.pause= function(){
+		
+	};
+	
+	WamiRecorderClass.prototype.stop= function(){
+		
+	};
+	
+	//end Wami based Audio Recorder
+	
 	var RecorderClass= function(){
 		this._initialized= false;
 		this._loaded= false;
@@ -85,6 +270,7 @@
 		this._ss_container= "";
 		this._elapsed= 0, this._last_ts= 0;
 		this._timer= null;
+		this._recorder = new WebAudioClass();
 	};
 	RecorderClass.prototype= new EventEmitter();//inherit from EventEmitter
 	
@@ -94,44 +280,23 @@
 			self.emit("load");
 		}
 		else {
-			//load additional js required for wami
-			//swfobject is a commonly used library to embed Flash content
-			loadScript(server_config.swfobject_url, function(){
-				// Setup the recorder interface
-				loadScript(server_config.recorder_url, function(){
-					self._loaded= true;
-					self.emit("load");
-				});
+			this._recorder.load(function(){
+				self._loaded= true;
+				self.emit("load");
 			});
 		}
 	};
 	
 	RecorderClass.prototype.init= function(ss_container){
 		var self= this;
-		this._ss_container= ss_container;
-		if (!self._initialized){
-			document.getElementById(self._ss_container).style.display="";
-			Wami.setup({
-				id : self._ss_container,
-				swfUrl: server_config.wami_swfurl,
-				onReady : function(){
-					self._initialized= true;
-					var ws= Wami.getSettings();
-					ws.container= "au";	//options for streaming (POST)
-					try{
-						Wami.setSettings(ws);
-					}catch(e){
-						
-					}
-					Wami.hide();
-					self.emit("init");
-				},
-				onLoaded: function(){
-					
-				},
-				onError: function(){
-					self.emit("error", arguments);
-				}
+		if (!this._initialized){
+			this._recorder.on("init", function(){
+				self._initialized= true;
+				console.log("recorder initialized");
+				self.emit("init");
+			});
+			this._recorder.init({
+				ss_container: ss_container
 			});
 		}
 		else {
@@ -140,15 +305,7 @@
 	};
 	
 	RecorderClass.prototype.start= function(){
-        try {
-            Wami.startRecording(this._recording_url);
-        }
-        catch(e){
-			//FIXME: need to remove this once automatic stopping is recognized
-            //IF the recording stops automatically, this is executed.
-            console.log("Retry recording...");
-            Wami.startRecording(this._recording_url);
-        }
+        this._recorder.record(this._recording_url);
 		this._elapsed= 0;
 		this.initStopWatch();
 		this.emit("start");
@@ -156,13 +313,14 @@
 	};
 	
 	RecorderClass.prototype.stop= function(){
-		Wami.stopRecording();
+        this._recorder.stop();
 		this.endStopWatch();
 		this.emit("end");
 	};
 	
 	//TODO: need to implement this
 	RecorderClass.prototype.pause= function(){
+        this._recorder.pause();
 		this.emit("paused");
 	};
 	
@@ -301,4 +459,5 @@
 	};
 	
 	JSCast= new JSCastClass();
+
 })();
