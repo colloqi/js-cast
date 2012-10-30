@@ -87,7 +87,7 @@
 	var WebAudioClass = function() {
 		this.audioSessionInProgress = false;
 		
-		this.numChannels = 2;		//hardcoded to 2
+		this.numChannels = 1;		//hardcoded to 1
 		this.Float32ArrayBuffer = [];
 		
 		this.context = null;
@@ -107,14 +107,14 @@
 		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
 									navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		
-		var default_config= {bufferLen: 4096}
+		var default_config= {bufferLen: 8192}
 		var config = a_config || {};
 		for (var key in default_config){
 			this[key] = typeof (config[key]) !== "undefined"? config[key] : default_config[key];
 		}
 						
 		this.Float32ArrayBuffer[0] = new Float32Array(this.bufferLen);	
-		this.Float32ArrayBuffer[1] = new Float32Array(this.bufferLen);
+		//this.Float32ArrayBuffer[1] = new Float32Array(this.bufferLen);
 										   
 		var createAudioContext = function(localMediaStream) {
 			
@@ -137,7 +137,8 @@
 				self.worker.onmessage = function(e){
 					var ab = e.data;
 					//self.emit('data',ab);
-					sendPCMData(self._recording_url, ab);
+					//sendPCMData(self._recording_url, ab);
+					console.log(e.data);		//post is done in worker itself, only console messages are sent
 				}
 				
 				self.worker.postMessage({
@@ -157,8 +158,8 @@
 				self.worker.postMessage({
 					command: 'record',
 					buffer: [
-						e.inputBuffer.getChannelData(0),
-						e.inputBuffer.getChannelData(1)
+						e.inputBuffer.getChannelData(0)
+						//e.inputBuffer.getChannelData(1)
 					]
 				});
 			}
